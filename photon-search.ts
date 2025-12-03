@@ -163,6 +163,15 @@ function categoriesToOsmTags(categories?: any) {
   if (!categories || !Array.isArray(categories) || categories.length === 0) {
     return undefined;
   }
+  
+  // If "all" is present, return undefined to disable category filtering
+  const hasAll = categories.some(
+    (raw) => String(raw ?? "").trim().toLowerCase() === "all",
+  );
+  if (hasAll) {
+    return undefined;
+  }
+  
   const out: Record<string, string[]> = {};
   for (const raw of categories) {
     const c = String(raw ?? "").trim().toLowerCase();
@@ -170,7 +179,9 @@ function categoriesToOsmTags(categories?: any) {
     if (!tag) continue;
     const [k, v] = tag.split(":");
     if (!out[k]) out[k] = [];
-    out[k].push(v);
+    if (!out[k].includes(v)) {
+      out[k].push(v);
+    }
   }
   return Object.keys(out).length ? out : undefined;
 }
